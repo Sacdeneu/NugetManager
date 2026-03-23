@@ -1,0 +1,31 @@
+## .NET / WPF
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.ncb
+*.sln.docstates
+
+## NuGet
+*.nupkg
+*.snupkg
+nupkg-output/
+packages/
+!**/[Pp]ackages/build/
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+
+## VS Code
+.vscode/
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## App data / local storage
+NugetManager/packages/
+NugetManager/appsettings.*.json

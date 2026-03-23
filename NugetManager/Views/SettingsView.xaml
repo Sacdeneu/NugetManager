@@ -1,0 +1,159 @@
+<UserControl x:Class="NugetManager.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:NugetManager.ViewModels"
+             xmlns:h="clr-namespace:NugetManager.Helpers"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel, IsDesignTimeCreatable=False}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Topbar -->
+        <Border Grid.Row="0" Padding="18,12"
+                BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <TextBlock Text="Paramètres" FontSize="15" FontWeight="Medium"
+                           Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="18,16,18,18" h:SpacingHelper.Spacing="11">
+
+                <!-- Serveur local -->
+                <Border BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0.5"
+                        CornerRadius="6" Padding="13">
+                    <StackPanel h:SpacingHelper.Spacing="9">
+                        <TextBlock Text="SERVEUR LOCAL" FontSize="10" FontWeight="Medium"
+                                   Foreground="{DynamicResource TextBrush}" Opacity="0.5"/>
+
+                        <!-- Status -->
+                        <StackPanel Orientation="Horizontal" h:SpacingHelper.Spacing="5">
+                            <Ellipse Width="7" Height="7" VerticalAlignment="Center">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Fill" Value="#A32D2D"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsServerRunning}" Value="True">
+                                                <Setter Property="Fill" Value="#639922"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <TextBlock FontSize="12" Foreground="{DynamicResource TextBrush}" Opacity="0.7">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Serveur hors ligne"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsServerRunning}" Value="True">
+                                                <Setter Property="Text" Value="Serveur en ligne"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- Feed URL row -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding FeedUrl, Mode=OneWay}"
+                                     IsReadOnly="True" FontFamily="Consolas" FontSize="11"
+                                     Padding="6,5" Margin="0,0,7,0"/>
+                            <Button Grid.Column="1" Content="Copier" Command="{Binding CopyFeedUrlCommand}"
+                                    Padding="9,3" FontSize="11" Margin="0,0,5,0"/>
+                            <Button Grid.Column="2" Content="Vérifier" Command="{Binding CheckServerStatusCommand}"
+                                    Padding="9,3" FontSize="11" Margin="0,0,5,0"/>
+                            <Button Grid.Column="3" Content="Redémarrer" Command="{Binding RestartServerCommand}"
+                                    Style="{StaticResource AccentButtonStyle}" Padding="9,3" FontSize="11"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Configuration du serveur -->
+                <Border BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0.5"
+                        CornerRadius="6" Padding="13">
+                    <StackPanel h:SpacingHelper.Spacing="9">
+                        <TextBlock Text="CONFIGURATION DU SERVEUR" FontSize="10" FontWeight="Medium"
+                                   Foreground="{DynamicResource TextBrush}" Opacity="0.5"/>
+
+                        <!-- Port -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="115"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Port du serveur" FontSize="11"
+                                       Foreground="{DynamicResource TextBrush}" Opacity="0.7"
+                                       VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding Settings.BaGetPort, UpdateSourceTrigger=PropertyChanged}"
+                                     MaxWidth="80" HorizontalAlignment="Left" Padding="6,5" FontSize="12"/>
+                        </Grid>
+
+                        <!-- Packages folder -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="115"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Dossier packages" FontSize="11"
+                                       Foreground="{DynamicResource TextBrush}" Opacity="0.7"
+                                       VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding Settings.PackagesFolder, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="6,5" FontSize="12" Margin="0,0,6,0"/>
+                            <Button Grid.Column="2" Content="Parcourir" Padding="9,3" FontSize="11"
+                                    Command="{Binding BrowsePackagesFolderCommand}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Apparence -->
+                <Border BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0.5"
+                        CornerRadius="6" Padding="13">
+                    <StackPanel h:SpacingHelper.Spacing="9">
+                        <TextBlock Text="APPARENCE" FontSize="10" FontWeight="Medium"
+                                   Foreground="{DynamicResource TextBrush}" Opacity="0.5"/>
+                        <StackPanel Orientation="Horizontal" h:SpacingHelper.Spacing="7">
+                            <CheckBox IsChecked="{Binding Settings.IsRoundedCorners}"
+                                      Foreground="{DynamicResource TextBrush}" FontSize="12"/>
+                            <TextBlock Text="Coins arrondis" FontSize="12"
+                                       Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" h:SpacingHelper.Spacing="7">
+                            <CheckBox IsChecked="{Binding Settings.UseAccentColor}"
+                                      Foreground="{DynamicResource TextBrush}" FontSize="12"/>
+                            <TextBlock Text="Couleur d'accentuation système" FontSize="12"
+                                       Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" h:SpacingHelper.Spacing="7">
+                            <CheckBox IsChecked="{Binding Settings.SaveWindowPosition}"
+                                      Foreground="{DynamicResource TextBrush}" FontSize="12"/>
+                            <TextBlock Text="Sauvegarder la position de la fenêtre" FontSize="12"
+                                       Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Status -->
+                <TextBlock Text="{Binding StatusMessage}"
+                           Foreground="{DynamicResource SystemAccentBrush}"
+                           FontSize="12"/>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

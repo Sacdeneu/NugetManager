@@ -1,0 +1,349 @@
+<UserControl x:Class="NugetManager.Views.PackagerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:NugetManager.ViewModels"
+             xmlns:h="clr-namespace:NugetManager.Helpers"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:PackagerViewModel, IsDesignTimeCreatable=False}">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- Tab button style -->
+        <Style x:Key="TabBtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Opacity" Value="0.6"/>
+            <Setter Property="Padding" Value="15,9"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Section box style -->
+        <Style x:Key="SectionStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+            <Setter Property="BorderThickness" Value="0.5"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="13"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Topbar -->
+        <Border Grid.Row="0" Padding="18,12"
+                BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,0,0,1">
+            <StackPanel>
+                <TextBlock Text="Packager un projet" FontSize="15" FontWeight="Medium"
+                           Foreground="{DynamicResource TextBrush}"/>
+                <TextBlock Text="Créez et publiez des .nupkg sur votre serveur local" FontSize="11"
+                           Foreground="{DynamicResource TextBrush}" Opacity="0.5" Margin="0,2,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Tab bar -->
+        <Border Grid.Row="1" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Via .csproj"
+                        Command="{Binding SwitchTabCommand}" CommandParameter="csproj">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabBtnStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveTab}" Value="csproj">
+                                    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentBrush}"/>
+                                    <Setter Property="Opacity" Value="1"/>
+                                    <Setter Property="FontWeight" Value="Medium"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="Via solution .sln"
+                        Command="{Binding SwitchTabCommand}" CommandParameter="sln">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabBtnStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveTab}" Value="sln">
+                                    <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource SystemAccentBrush}"/>
+                                    <Setter Property="Opacity" Value="1"/>
+                                    <Setter Property="FontWeight" Value="Medium"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Tab content -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="18,14,18,18" h:SpacingHelper.Spacing="11">
+
+                <!-- ── Tab: .csproj ────────────────────────────────────── -->
+                <StackPanel h:SpacingHelper.Spacing="11">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveTab}" Value="csproj">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- Source -->
+                    <Border Style="{StaticResource SectionStyle}">
+                        <StackPanel h:SpacingHelper.Spacing="9">
+                            <TextBlock Text="FICHIER SOURCE" FontSize="10" FontWeight="Medium"
+                                       Foreground="{DynamicResource TextBrush}" Opacity="0.5"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="115"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Chemin .csproj" FontSize="11" Foreground="{DynamicResource TextBrush}"
+                                           Opacity="0.7" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding CsprojPath}" IsReadOnly="True"
+                                         Padding="6,5" FontSize="12" Margin="0,0,6,0"
+                                         Foreground="{DynamicResource TextBrush}" Opacity="0.7"/>
+                                <Button Grid.Column="2" Content="Parcourir" Padding="9,3" FontSize="11"
+                                        Command="{Binding BrowseCsprojCommand}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Build options -->
+                    <Border Style="{StaticResource SectionStyle}">
+                        <StackPanel h:SpacingHelper.Spacing="9">
+                            <TextBlock Text="OPTIONS DE BUILD" FontSize="10" FontWeight="Medium"
+                                       Foreground="{DynamicResource TextBrush}" Opacity="0.5"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="115"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Configuration" FontSize="11" Foreground="{DynamicResource TextBrush}"
+                                           Opacity="0.7" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" SelectedItem="{Binding CsprojConfiguration}"
+                                          Width="110" HorizontalAlignment="Left" FontSize="12" Padding="6,5">
+                                    <ComboBoxItem Content="Release" IsSelected="True"/>
+                                    <ComboBoxItem Content="Debug"/>
+                                </ComboBox>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="115"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Version du package" FontSize="11" Foreground="{DynamicResource TextBrush}"
+                                           Opacity="0.7" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding CsprojVersion, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6,5" FontSize="12"/>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="115"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Dossier de sortie" FontSize="11" Foreground="{DynamicResource TextBrush}"
+                                           Opacity="0.7" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding CsprojOutputDir}" IsReadOnly="True"
+                                         Padding="6,5" FontSize="12" Margin="0,0,6,0"
+                                         Foreground="{DynamicResource TextBrush}" Opacity="0.7"/>
+                                <Button Grid.Column="2" Content="Parcourir" Padding="9,3" FontSize="11"
+                                        Command="{Binding BrowseCsprojOutputCommand}"/>
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" h:SpacingHelper.Spacing="7">
+                                <CheckBox IsChecked="{Binding CsprojAutoPublish}" FontSize="12"
+                                          Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock Text="Publier automatiquement sur le serveur local après le pack"
+                                           FontSize="12" Foreground="{DynamicResource TextBrush}" Opacity="0.7"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" h:SpacingHelper.Spacing="7">
+                                <CheckBox IsChecked="{Binding CsprojIncludeSymbols}" FontSize="12"
+                                          Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock Text="Inclure les symboles (.snupkg)"
+                                           FontSize="12" Foreground="{DynamicResource TextBrush}" Opacity="0.7"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Console -->
+                    <Border Style="{StaticResource SectionStyle}">
+                        <StackPanel h:SpacingHelper.Spacing="9">
+                            <TextBlock Text="SORTIE CONSOLE" FontSize="10" FontWeight="Medium"
+                                       Foreground="{DynamicResource TextBrush}" Opacity="0.5"/>
+                            <ScrollViewer MaxHeight="180" VerticalScrollBarVisibility="Auto"
+                                          Background="{DynamicResource ControlDarkBrush}"
+                                          x:Name="ConsoleScroll">
+                                <TextBlock Text="{Binding ConsoleOutput}" FontFamily="Consolas" FontSize="11"
+                                           Foreground="{DynamicResource TextBrush}" Opacity="0.8"
+                                           Padding="9,8" TextWrapping="Wrap" LineHeight="17"/>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Actions -->
+                    <StackPanel Orientation="Horizontal" h:SpacingHelper.Spacing="8">
+                        <Button Content="▶ Lancer le pack" Command="{Binding PackCsprojCommand}"
+                                Style="{StaticResource AccentButtonStyle}" Padding="13,5" FontSize="12"/>
+                        <Button Content="Annuler" Command="{Binding CancelPackCommand}" Padding="13,5" FontSize="12"
+                                Visibility="{Binding IsPacking, Converter={StaticResource BoolToVis}}"/>
+                        <Button Content="Effacer" Command="{Binding ClearConsoleCommand}" Padding="13,5" FontSize="12"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- ── Tab: .sln ───────────────────────────────────────── -->
+                <StackPanel h:SpacingHelper.Spacing="11">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveTab}" Value="sln">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- Solution source -->
+                    <Border Style="{StaticResource SectionStyle}">
+                        <StackPanel h:SpacingHelper.Spacing="9">
+                            <TextBlock Text="SOLUTION .SLN" FontSize="10" FontWeight="Medium"
+                                       Foreground="{DynamicResource TextBrush}" Opacity="0.5"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="115"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Chemin .sln" FontSize="11" Foreground="{DynamicResource TextBrush}"
+                                           Opacity="0.7" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding SlnPath}" IsReadOnly="True"
+                                         Padding="6,5" FontSize="12" Margin="0,0,6,0"
+                                         Foreground="{DynamicResource TextBrush}" Opacity="0.7"/>
+                                <Button Grid.Column="2" Content="Parcourir" Padding="9,3" FontSize="11"
+                                        Command="{Binding BrowseSlnCommand}"/>
+                            </Grid>
+
+                            <!-- Project selector -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="115"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Projets à packer" FontSize="11" Foreground="{DynamicResource TextBrush}"
+                                           Opacity="0.7" VerticalAlignment="Top" Margin="0,6,0,0"/>
+                                <Border Grid.Column="1" BorderBrush="{DynamicResource BorderLightBrush}"
+                                        BorderThickness="0.5" CornerRadius="4" MaxHeight="120">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl ItemsSource="{Binding SlnProjects}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" h:SpacingHelper.Spacing="7" Margin="8,5">
+                                                        <CheckBox IsChecked="{Binding IsSelected}"/>
+                                                        <TextBlock Text="{Binding Name}" FontSize="12"
+                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                   VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Options -->
+                    <Border Style="{StaticResource SectionStyle}">
+                        <StackPanel h:SpacingHelper.Spacing="9">
+                            <TextBlock Text="OPTIONS" FontSize="10" FontWeight="Medium"
+                                       Foreground="{DynamicResource TextBrush}" Opacity="0.5"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="115"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Configuration" FontSize="11" Foreground="{DynamicResource TextBrush}"
+                                           Opacity="0.7" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" SelectedItem="{Binding SlnConfiguration}"
+                                          Width="110" HorizontalAlignment="Left" FontSize="12" Padding="6,5">
+                                    <ComboBoxItem Content="Release" IsSelected="True"/>
+                                    <ComboBoxItem Content="Debug"/>
+                                </ComboBox>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" h:SpacingHelper.Spacing="7">
+                                <CheckBox IsChecked="{Binding SlnAutoPublish}" FontSize="12"/>
+                                <TextBlock Text="Publier sur le serveur local après le pack"
+                                           FontSize="12" Foreground="{DynamicResource TextBrush}" Opacity="0.7"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Console -->
+                    <Border Style="{StaticResource SectionStyle}">
+                        <StackPanel h:SpacingHelper.Spacing="9">
+                            <TextBlock Text="SORTIE CONSOLE" FontSize="10" FontWeight="Medium"
+                                       Foreground="{DynamicResource TextBrush}" Opacity="0.5"/>
+                            <ScrollViewer MaxHeight="180" VerticalScrollBarVisibility="Auto"
+                                          Background="{DynamicResource ControlDarkBrush}">
+                                <TextBlock Text="{Binding ConsoleOutput}" FontFamily="Consolas" FontSize="11"
+                                           Foreground="{DynamicResource TextBrush}" Opacity="0.8"
+                                           Padding="9,8" TextWrapping="Wrap" LineHeight="17"/>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" h:SpacingHelper.Spacing="8">
+                        <Button Content="▶ Lancer le pack" Command="{Binding PackSlnCommand}"
+                                Style="{StaticResource AccentButtonStyle}" Padding="13,5" FontSize="12"/>
+                        <Button Content="Annuler" Command="{Binding CancelPackCommand}" Padding="13,5" FontSize="12"
+                                Visibility="{Binding IsPacking, Converter={StaticResource BoolToVis}}"/>
+                    </StackPanel>
+                </StackPanel>
+
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
